@@ -1,4 +1,5 @@
 from First_Follow import compute_first, compute_follow
+from LL_Parser import verify_LL1, createTableLL, print_ll1_table, StringAnalysis
 
 def ReadGrammars(filename):
     grammars = []
@@ -31,6 +32,7 @@ if __name__ == "__main__":
         print(f"Grammar {i + 1}:")
         for nonTerminal, productions in grammar.items():
             print(f"{nonTerminal} -> {' | '.join([''.join(prod) for prod in productions])}")
+        print()
 
         first = compute_first(grammar)
         print("First sets:")
@@ -41,4 +43,24 @@ if __name__ == "__main__":
         print("Follow sets:")
         for nonTerminal, followSet in follow.items():
             print(f"Follow({nonTerminal}) = {{ {', '.join(followSet)} }}")
-            
+        print()
+
+        print("Verifying if the grammar is LL(1)...")
+        verify_LL1(grammar)
+
+        print()
+
+        table = createTableLL(grammar)
+        if table is not None:
+            print_ll1_table(table)
+        else:
+            print("The table parsing cannot be created because the grammar is not LL(1).")
+            print()
+            continue
+
+        print()
+
+        tested_string = "ad"
+        StringAnalysis(tested_string, table)
+
+        print()
