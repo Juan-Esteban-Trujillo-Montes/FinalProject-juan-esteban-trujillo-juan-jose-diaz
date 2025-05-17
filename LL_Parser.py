@@ -1,5 +1,12 @@
 from First_Follow import compute_first, compute_follow
 def verify_LL1(grammar):
+
+    for nonTerminal, productions in grammar.items():
+        for prod in productions:
+            if prod[0] == nonTerminal:
+                print(f"The grammar is not LL(1) due to left recursion in {nonTerminal} -> {prod}")
+                return False
+
     first = compute_first(grammar)
     follow = compute_follow(grammar, first)
 
@@ -41,8 +48,6 @@ def verify_LL1(grammar):
                 if first_i.intersection(first_j):
                     print(f"Grammar is not LL(1) due to {nonTerminal} -> {prod_i} and {nonTerminal} -> {prod_j}")
                     return False
-                   
-    print("Grammar is LL(1)")
     return True
 
 def createTableLL(grammar):
@@ -69,6 +74,7 @@ def createTableLL(grammar):
                     table[nonTerminal][terminal] = production
                 else:
                     print(f"Conflict in LL(1) table for {nonTerminal} -> {production} and {nonTerminal} -> {table[nonTerminal][terminal]}")
+                    print("Grammar is not LL(1)")
                     return None
             
             if 'e' in first_set:
@@ -77,9 +83,9 @@ def createTableLL(grammar):
                         table[nonTerminal][terminal] = production
                     else:
                         print(f"Conflict in LL(1) table for {nonTerminal} -> {production} and {nonTerminal} -> {table[nonTerminal][terminal]}")
+                        print("Grammar is not LL(1)")
                         return None
-            
-    print("LL(1) parsing table created successfully")
+
     return table
 
 def print_ll1_table(table):
@@ -104,13 +110,20 @@ def print_ll1_table(table):
             print(f" {prod_str:^10}|", end='')
         print()
 
-def StringAnalysis(string, table):
+def StringAnalysisLL(string, table):
+    print(f"{'String to analyze: ' + string:^66}")
+
     stack = ['$','S']
     index = 0
     string += '$'
     
+    print(f"{'Stack':^30} | {'Remaining String':^38}")
+    print("-" * 72)
+
     while len(stack) != 1:
-        print(f"Stack: {stack} | Remaining String: {string[index:]}")
+        pila_str = ''.join(list(reversed(stack)))
+        restante_str = string[index:]
+        print(f"{pila_str:^30} | {restante_str:^38}")
         top = stack.pop()
         currentCharacter = string[index]
 
@@ -127,13 +140,20 @@ def StringAnalysis(string, table):
             for symbol in reversed(production):
                 stack.append(symbol)
         else:
-            print(f"Error: Unexpected symbol {currentCharacter} at index {index}")
+            print()
+            print(f"{'Error: Unexpected symbol ' + currentCharacter + ' at index ' + str(index):^66}")
+            print(f"{'String is rejected\n':^66}")
             return False
+           
+    pila_str = ''.join(list(reversed(stack)))
+    restante_str = string[index:]
+    print(f"{pila_str:^30} | {restante_str:^38}")
 
-    print(f"Stack: {stack} | Remaining String: {string[index:]}")
     if string[index] == '$' and stack == ['$']:
-        print("String is accepted")
+        print()
+        print(f"{'String is accepted\n':^62}")
         return True
     else:
-        print("String is not accepted")
+        print()
+        print(f"{'String is rejected\n':^62}")
         return False
