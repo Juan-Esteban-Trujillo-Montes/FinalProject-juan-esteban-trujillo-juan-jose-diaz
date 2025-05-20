@@ -1,6 +1,6 @@
 from First_Follow import compute_first, compute_follow
 from LL_Parser import verify_LL1, createTableLL, print_ll1_table, StringAnalysisLL
-from SLR_Parser import makeItems, closure, goto
+from SLR_Parser import makeItems, closure, goto, build_LR0_states, createSLRtable
 def ReadGrammars(filename):
     grammars = []
     with open(filename, "r") as file:
@@ -49,10 +49,10 @@ while True:
 
     if option == "1":
         grammar_num = input("Enter the grammar number to calculate First and Follow sets: ")
-        if not grammar_num.isdigit() or int(grammar) < 1 or int(grammar) > len(grammars):
+        if not grammar_num.isdigit() or int(grammar_num) < 1 or int(grammar_num) > len(grammars):
             print("Invalid grammar number. Please try again.\n")
             continue
-        grammar = grammars[int(grammar) - 1]
+        grammar = grammars[int(grammar_num) - 1]
         first = compute_first(grammar)
         follow = compute_follow(grammar, first)
         print("First sets:")
@@ -82,3 +82,79 @@ while True:
             if lhs != "S'":
                 print(f"{lhs} -> {' '.join(rhs) if rhs else 'e'}")
         print()
+
+    elif option == "3":
+        grammar_num = input("Enter the grammar number to print LR(0) states and transitions: ")
+        if not grammar_num.isdigit() or int(grammar_num) < 1 or int(grammar_num) > len(grammars):
+            print("Invalid grammar number. Please try again.\n")
+            continue
+
+        grammar = grammars[int(grammar_num) - 1]
+        items, new_grammar = makeItems(grammar)
+        states, transitions = build_LR0_states(new_grammar)
+        print("\nLR(0) States:")
+        for idx, state in enumerate(states):
+            print(f"State {idx}:")
+            for item in sorted(state):
+                lhs, rhs = item
+                print(f"  {lhs} -> {' '.join(rhs)}")
+            print()
+        print("Transitions:")
+        for (i, symbol), j in sorted(transitions.items()):
+            print(f"  State {i} -- {symbol} --> State {j}")
+        print()
+
+    elif option == "4":
+        grammar_num = input("Enter the grammar number to check grammar compatibility: ")
+        if not grammar_num.isdigit() or int(grammar_num) < 1 or int(grammar_num) > len(grammars):
+            print("Invalid grammar number. Please try again.\n")
+            continue
+        
+        grammar = grammars[int(grammar_num) - 1]
+
+        is_LL = verify_LL1(grammar)
+
+        items, new_grammar = makeItems(grammar)
+        states, transitions = build_LR0_states(new_grammar)
+        is_SLR, action, goto_table = createSLRtable(states, transitions, new_grammar)
+
+        if is_LL and is_SLR:
+            while True:
+                print("Select a parser (T: for LL(1), B: for SLR(1), Q: quit):")
+                option = input("Enter your choice: ").upper()
+                if option == "T":
+                    table = createTableLL(grammar)
+                    print("LL(1) Parsing Table:")
+                    print_ll1_table(table)
+                    string = input("Enter a string to analyze: ")
+                    StringAnalysisLL(string, table)
+                    
+
+                elif option == "B":
+                   pass
+                    
+                elif option == "Q":
+                    break
+                else:
+                    print("Invalid option. Please try again.")
+
+        elif is_LL and not is_SLR:
+            print("The grammar is LL(1).")
+            table = createTableLL(grammar)
+            print("LL(1) Parsing Table:")
+            print_ll1_table(table)
+            string = input("Enter a string to analyze: ")
+            StringAnalysisLL(string, table)
+
+        elif not is_LL and is_SLR:
+            print("The grammar is SLR(1).")
+            
+            
+        else:
+            print("The Grammar is neither LL(1) nor SLR(1).\n")
+                
+    elif option == "Q":
+        exit()
+
+    else:
+        print("Invalid option. Please try again.")
