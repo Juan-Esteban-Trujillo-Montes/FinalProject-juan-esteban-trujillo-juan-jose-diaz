@@ -1,6 +1,6 @@
 from First_Follow import compute_first, compute_follow
 from LL_Parser import verify_LL1, createTableLL, print_ll1_table, StringAnalysisLL
-from SLR_Parser import makeItems, closure, goto, build_LR0_states, createSLRtable
+from SLR_Parser import makeItems, closure, goto, build_LR0_states, createSLRtable, print_SLR_table, StringAnalysisSLR
 def ReadGrammars(filename):
     grammars = []
     with open(filename, "r") as file:
@@ -131,7 +131,9 @@ while True:
                     
 
                 elif option == "B":
-                   pass
+                    print_SLR_table(action, goto_table, states, new_grammar)
+                    string = input("Enter a string to analyze: ")
+                    StringAnalysisSLR(string, action, goto_table, states, new_grammar)
                     
                 elif option == "Q":
                     break
@@ -148,7 +150,9 @@ while True:
 
         elif not is_LL and is_SLR:
             print("The grammar is SLR(1).")
-            
+            print_SLR_table(action, goto_table, states, new_grammar)
+            string = input("Enter a string to analyze: ")
+            StringAnalysisSLR(string, action, goto_table, states, new_grammar)
             
         else:
             print("The Grammar is neither LL(1) nor SLR(1).\n")
